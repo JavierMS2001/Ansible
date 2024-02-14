@@ -1,0 +1,78 @@
+---
+# tasks file for mariadbRecovery
+
+#       <------------------------------- LISTAR LAS BACKUPS -------------------------------->
+
+- name: Obtener la lista de backups de CentOS
+  find:
+          paths: /etc/ansible/recursos/backups/CentOS-server/
+          patterns: "*.sql"
+          file_type: file
+  register: centos_sql_files
+  delegate_to: localhost
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Obtener la lista de backups de Debian
+  find:
+          paths: /etc/ansible/recursos/backups/Debian-server/
+          patterns: "*.sql"
+          file_type: file
+  register: debian_sql_files
+  delegate_to: localhost
+  when: ansible_facts.distribution == "Debian"
+
+#       <-------------------- ORDENAR LAS BACKUPS POR ORDEN DE MODIFICACIÓN ------------------->
+  
+- name: Ordenar backups CentOS
+  set_fact:
+          sorted_centos_sql_files: "{{ centos_sql_files.files | sort(attribute='mtime') | reverse }}"
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Ordenar backups Debian
+  set_fact:
+          sorted_debian_sql_files: "{{ debian_sql_files.files | sort(attribute='mtime') | reverse }}"
+  when: ansible_facts.distribution == "Debian"
+
+#       <----------------------- SELECCIONAR EL ÚLTIMO ARCHIVO MODIFICADO ------------------>
+
+- name: Seleccionar ultima backup modificada CentOS
+  set_fact:
+          latest_centos_sql_file: "{{ sorted_centos_sql_files[0] }}"
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Seleccionar ultima backup modificada Debian
+  set_fact:
+          latest_debian_sql_file: "{{ sorted_debian_sql_files[0] }}"
+  when: ansible_facts.distribution == "Debian"
+
+#     <--------------- CREACIÓN DEL FICHERO BACKUP EN CASO DE QUE NO EXISTA -------------->
+
+- name: Crear directorio backup
+  become: true
+  file:
+          path: /backup
+          state: directory
+
+#       <----------- COPIA DEL ÚLTIMO BACKUP DEL CONTROL NODE AL SERVIDOR REMOTO ----------->
+
+- name: Copiar backup a servidor remoto CentOS
+  copy: 
+          content: "{{ lookup('file', latest_centos_sql_file.path) }}"
+          dest: /backup/restore.sql
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Copiar backup a servidor remoto Debian
+  copy:
+          content: "{{ lookup('file', latest_debian_sql_file.path) }}"
+          dest: /backup/restore.sql
+  when: ansible_facts.distribution == "Debian"
+
+#       <----------------------- RESTAURACIÓN DE LA BASE DE DATOS ---------------------->
+
+- name: Restaurar base de datos
+  mysql_db:
+          login_user: wordpress-user
+          login_password: 1234
+          name: bdwordpress
+          state: import
+          target: /backup/restore.sql

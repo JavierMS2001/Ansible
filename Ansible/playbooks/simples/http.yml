@@ -1,0 +1,57 @@
+---
+- name: Establecer el httpd y abrir el puerto del firewall
+  hosts: httpd
+
+  tasks:
+
+  - name: Actualizar paquetes
+    package:
+     name: '*'
+     state: latest
+
+  - name: Instalar paquete apache
+    yum:
+     name: httpd
+     state: present
+
+  - name: Iniciar httpd
+    service:
+     name: httpd
+     state: started
+
+  - name: Abrir puerto para servicio http
+    firewalld:
+     service: http
+     permanent: true
+     state: enabled
+
+  - name: Configuración Proxy
+    template:
+            src: /etc/ansible/recursos/proxy.conf
+            dest: /etc/httpd/conf.d/proxy.conf
+            owner: root
+            group: root
+            mode: '0644'
+
+  - name: Deshabilitar SeLinux
+    template:
+            src: /etc/ansible/recursos/config
+            dest: /etc/selinux/config
+            owner: root
+            group: root
+            mode: '0644'
+
+  - name: Reiniciar servicio firewalld y cargar los cambios del firewall
+    service:
+     name: firewalld
+     state: reloaded
+   
+  - name: Reiniciar servidor remoto
+    reboot:
+            reboot_timeout: 30
+            post_reboot_delay: 30   
+
+  - name: Iniciar httpd
+    service:
+         name: httpd
+         state: started             

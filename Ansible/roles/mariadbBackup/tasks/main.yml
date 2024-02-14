@@ -1,0 +1,62 @@
+---
+# tasks file for mariadbBackup
+
+#       <------ CREACIÓN DEL DIRECTORIA Y CARGAR FECHA Y HORA EN UNA VARIABLE ---------->
+
+- name: Crear directorio de copias de seguridad
+  file:
+          path: /backup
+          state: directory
+          mode: '0755'
+
+- name: Obeneter fecha y hora actual
+  set_fact:
+          timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.time }}"
+
+#       <-------------- CREACIÓN Y COMPROBACIÓN DE LA COPIA DE SEGURIDAD ----------------------------->
+
+- name: Realizar backup de la base de datos CentOS
+  mysql_db:
+          state: dump
+          name: bdwordpress
+          target: "/backup/bdwordpress-CentOS_backup_{{ timestamp }}.sql"
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Realizar backup de la base de datos Debian
+  mysql_db:
+          state: dump
+          name: bdwordpress
+          target: "/backup/bdwordpress-Debian_backup_{{ timestamp }}.sql"
+  when: ansible_facts.distribution == "Debian"
+
+
+- name: Comprobar si se ha realizado correctamente el backup CentOS
+  stat:
+          path: "/backup/bdwordpress-CentOS_backup_{{ timestamp }}.sql"
+  register: result
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Comprobar si se ha realizado correctamente el backup Debian
+  stat:
+          path: "/backup/bdwordpress-Debian_backup_{{ timestamp }}.sql"
+  register: result
+  when: ansible_facts.distribution == "Debian"
+
+
+#       <-------------------- IMPORTAR BACKUP AL NODO DE CONTROL ------------------------------->
+
+- name: Importar backup al control node CentOS
+  fetch: 
+        src: "/backup/bdwordpress-CentOS_backup_{{ timestamp }}.sql"
+        dest: "/etc/ansible/recursos/backups/CentOS-server/"
+        flat: yes
+        when: result is success 
+  when: ansible_facts.distribution == "CentOS"
+
+- name: Importar backup al control node CentOS
+  fetch:
+        src: "/backup/bdwordpress-Debian_backup_{{ timestamp }}.sql"
+        dest: "/etc/ansible/recursos/backups/Debian-server/"
+        flat: yes
+        when: result is success
+  when: ansible_facts.distribution == "Debian"
