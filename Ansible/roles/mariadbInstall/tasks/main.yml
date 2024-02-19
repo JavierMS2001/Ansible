@@ -7,11 +7,8 @@
   yum:
           name:
                   - mariadb-server
-                  - python2
                   - python3
                   - python3-PyMySQL
-                  - python3-mysql
-                  - python2-PyMySQL
           state: latest
   when: ansible_facts.distribution == "CentOS"
 
@@ -31,6 +28,15 @@
           enabled: true
           state: started
  
+
+# <--------------- ESTABLECER CONTRASEÑA A USUARIO ROOT --------->
+
+- name: Ejecutar mysql_secure_installation
+  shell: |
+          echo -e "\nn\nY\nvagrant\nvagrant\nY\nn\nY\nY\n" | sudo mysql_secure_installation
+  args:
+   executable: /bin/bash
+
 # <--------------- IMPORTAR CONFIGURACIÓN A MARIADB DEBIAN ------------------------->
 
 - name: Establecer configuración Mariadb Debian
@@ -54,6 +60,7 @@
   mysql_db:
           name: bdwordpress
           login_user: root
+          login_password: vagrant
           login_host: localhost
           state: present
 
@@ -63,6 +70,9 @@
           password: 1234
           priv: 'bdwordpress.*:ALL,GRANT'
           host: '%'
+          login_user: root
+          login_password: vagrant
+          login_host: localhost
           state: present
 
 # <----------------- HABILITAR LOS PUERTOS NECESARIOS --------------------------->

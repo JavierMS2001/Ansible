@@ -1,23 +1,35 @@
 ---
+
 - name: Actualizar repositorios
   hosts: update
   roles:
           - UpdateRepo
+  tags:
+    - update
 
 - name: Instalar paquete http y configurar el Proxy
   hosts: http
   roles:
           - httpInstall
           - ProxyConfig
+  tags:
+    - http
 
 - name: Instalar y configurar Wordpress para que conecte con la base de datos
   hosts: wordpress
   roles:
           - httpInstall
           - wordpressInstall
+  tags:
+    - wordpress
 
 - name: Instalación y creación de tabla y usuario en MariaDB para Wordpress
   hosts: mariadb
+  become: yes
+  become_user: root
+  become_method: sudo
   roles:
           - mariadbInstall
-          - mariadbRecovery
+            #         - mariadbRecovery
+  tags:
+    - mariadb

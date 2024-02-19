@@ -1,22 +1,6 @@
 ---
 #               Tareas para la instalación y configuración de Wordpress
 #
-#       <--------------- IMPORTAR CLAVES REPOSITORIOS DE PHP 8 ------------------------>
-
-- name: Importar clave repositorios necesarios para php 8
-  rpm_key:
-        key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
-        state: present
-  when: ansible_facts.distribution == "CentOS"
-
-#       <-------------- HABILITAR REPOSITORIOS NECESARIOS PARA PHP 8 ----------------->
-
-- name: Habilitar repositorios
-  yum:
-          name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm, https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-          state: present
-  when: ansible_facts.distribution == "CentOS"
-
 #       <-------------- INSTALAR PAQUETES NECESARIOS PARA WORDPRESS -------------------->
 
 - name: Instalar paquetes requeridos
@@ -46,15 +30,15 @@
 
 #       <-------------------------- RESETEAR MODULO PHP ----------------------------------->
 
-- name:  Resetear modulo PHP
-  shell: dnf module reset php -y
-  when: ansible_facts.distribution == "CentOS"
+  #- name:  Resetear modulo PHP
+  #  shell: dnf module reset php -y
+  #  when: ansible_facts.distribution == "CentOS"
 
 #       <---------------------------------- INSTALAR PHP 8 --------------------------------->
 
-- name: Instalar php 8
-  shell: dnf module install php:remi-8.0 -y
-  when: ansible_facts.distribution == "CentOS"
+  #- name: Instalar php 8
+  #  shell: dnf module install php:remi-8.0 -y
+  #  when: ansible_facts.distribution == "CentOS"
 
 #       <--------------------------------- DESCARGAR WORDPRESS ----------------------------->
 
