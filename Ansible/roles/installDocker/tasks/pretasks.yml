@@ -1,0 +1,14 @@
+---
+
+- name: Instalar paquetes necesarios para docker
+  package:
+    name: 
+      - epel-release
+      - gcc
+      - gcc-c++
+      - nodejs
+      - gettext
+      - device-mapper-persistent-data
+      - lvm2
+      - bzip2
+    state: present

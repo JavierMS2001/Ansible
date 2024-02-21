@@ -1,0 +1,5 @@
+---
+
+- include_tasks: pretasks.yml
+
+- include_tasks: installDocker.yml
