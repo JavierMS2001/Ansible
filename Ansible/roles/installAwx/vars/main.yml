@@ -1,2 +1,7 @@
----
 # vars file for installAwx
+awx_version: "17.1.0"
+awx_zip_url: "https://github.com/ansible/awx/archive/{{ awx_version }}.zip"
+awx_zip_dest: "/tmp/awx_{{ awx_version }}.zip"
+awx_extract_dir: "/opt/"
+sample_inventory: "/etc/ansible/recursos/config-awx/inventory"
+inventory: "{{ awx_extract_dir }}/awx-{{ awx_version }}/installer/inventory"

@@ -1,2 +1,6 @@
 ---
 # tasks file for installAwx
+
+- include_tasks: importar.yml
+
+- include_tasks: instalacion.yml

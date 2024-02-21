@@ -1,0 +1,30 @@
+---
+
+- name: Importar variables
+  include_vars:
+    file: /etc/ansible/roles/installAwx/vars/main.yml
+    name: var
+
+- name: Verificar si el archivo existe
+  stat:
+    path: "{{ var.awx_zip_dest }}"
+  register: archivo_info
+
+- name: Descargar zip de AWX deseado
+  get_url:
+    url: "{{ var.awx_zip_url }}"
+    dest: "{{ var.awx_zip_dest }}"
+  when: not archivo_info.stat.exists
+
+- name: Descomprimir zip
+  unarchive:
+    src: "{{ var.awx_zip_dest }}"
+    dest: "{{ var.awx_extract_dir }}"
+    remote_src: yes
+    creates: "{{ var.awx_extract_dir }}/awx-{{ awx_version }}"
+  when: archivo_info.stat.exists
+
+- name: Establecer configuración de AWX
+  template:
+    src: "{{ var.sample_inventory }}"
+    dest: "{{ var.inventory }}"

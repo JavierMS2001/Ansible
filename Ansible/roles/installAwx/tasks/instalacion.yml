@@ -1,0 +1,24 @@
+---
+
+- name: Importar variables
+  include_vars:
+    file: /etc/ansible/roles/installAwx/vars/main.yml
+    name: var
+
+- name: Añadir ansible-playbook al PATH
+  ansible.builtin.lineinfile:
+    path: ~/.bashrc
+    line: 'export PATH="$PATH:/usr/local/bin/ansible-playbook"'
+    create: yes
+    insertafter: EOF
+
+- name: Recargar PATH
+  ansible.builtin.shell:
+    cmd: source ~/.bashrc
+
+- name: Ejecutar script de instalación de AWX
+  ansible.builtin.command:
+    cmd: "ansible-playbook -i inventory install.yml"
+  args:
+    chdir: "{{ awx_extract_dir }}awx-{{ awx_version }}/installer/"
+  become: yes
