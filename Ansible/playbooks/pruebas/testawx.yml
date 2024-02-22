@@ -2,5 +2,4 @@
 - hosts: localhost
   roles:
     - installDocker
-    - awx_check_vars
-    - awx_local_docker
+    - installAwx

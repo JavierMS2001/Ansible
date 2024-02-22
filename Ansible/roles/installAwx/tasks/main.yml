@@ -4,5 +4,3 @@
 - include_tasks: importar.yml
 
 - include_tasks: instalacion.yml
-
-- include_tasks: check_vars
