@@ -16,9 +16,50 @@
   ansible.builtin.shell:
     cmd: source ~/.bashrc
 
-- name: Ejecutar script de instalación de AWX
-  ansible.builtin.command:
-    cmd: "ansible-playbook -i inventory install.yml"
-  args:
-    chdir: "{{ awx_extract_dir }}awx-{{ awx_version }}/installer/"
-  become: yes
+    #- name: Ejecutar script de instalación de AWX
+    #  import_playbook: "{{ awx_extract_dir }}awx-{{ awx_version }}/installer/install.yml"
+    #  vars:
+    #    ansible_inventory: "{{ awx_extract_dir }}awx-{{ awx_version }}/installer/inventory"
+
+- name: Crear contenedor PostgreSQL
+  docker_container:
+    name: awx_postgres
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    env:
+      POSTGRES_DB: awx
+      POSTGRES_USER: awx
+      POSTGRES_PASSWORD: awxpass
+
+- name: Esperar a que el contenedor PostgreSQL esté disponible
+  wait_for:
+    host: localhost
+    port: 5432
+    delay: 10
+    timeout: 60
+
+- name: Crear contenedor RabbitMQ
+  docker_container:
+    name: awx_rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env:
+      RABBITMQ_DEFAULT_USER: awx
+      RABBITMQ_DEFAULT_PASS: awxpass
+
+- name: Esperar a que el contenedor RabbitMQ esté disponible
+  wait_for:
+    host: localhost
+    port: 5672
+    delay: 10
+    timeout: 60
+
+- name: Crear contenedor AWX
+  docker_container:
+    name: awx_web
+    image: ansible/awx_web
+    ports:
+      - "80:8052"

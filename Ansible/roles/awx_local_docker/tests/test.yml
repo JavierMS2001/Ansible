@@ -1,6 +1,5 @@
 ---
 - hosts: localhost
+  remote_user: root
   roles:
-    - installDocker
-    - awx_check_vars
     - awx_local_docker
