@@ -43,7 +43,7 @@
       ignore_errors: true
 
     - name: Run migrations in task container
-      shell: docker-compose run --rm --service-ports task awx-manage migrate --no-input
+      shell: docker compose run --rm --service-ports task awx-manage migrate --no-input
       args:
         chdir: "{{ docker_compose_dir }}"
 
