@@ -1,5 +1,13 @@
 ---
 
+- name: Importar Docker-CE repo
+  shell: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Actualizar repositorios
+  yum:
+    name: '*'
+    state: latest
+
 - name: Instalar Docker-CE
   dnf:
     name: docker-ce
